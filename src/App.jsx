@@ -1,37 +1,34 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import DiaryEditor from "./DiaryEditor";
 import DiaryList from "./DiaryList";
-import Lifecycle from "./Lifecycle";
-
-/* const dummyList = [
-  {
-    id: 1,
-    author: "Woodstock",
-    content: "What a Nice Day!",
-    emotion: 4,
-    created_date: new Date().getTime(), // getTime()은 현재 시간을 숫자(milliseconds)로 반환함
-  },
-  {
-    id: 2,
-    author: "Snoopy",
-    content: "I'm so happy",
-    emotion: 5,
-    created_date: new Date().getTime(),
-  },
-  {
-    id: 3,
-    author: "Charlie Brown",
-    content: "Gloomy Day :(",
-    emotion: 1,
-    created_date: new Date().getTime(),
-  },
-]; */
 
 function App() {
   const [data, setData] = useState([]);
 
   const dataId = useRef(0);
+
+  const getData = async () => {
+    const res = await fetch(
+      "https://jsonplaceholder.typicode.com/comments"
+    ).then((res) => res.json()); // fetch를 통해 데이터를 받아옴
+
+    const initData = res.slice(0, 20).map((it) => {
+      return {
+        author: it.email,
+        content: it.body,
+        emotion: Math.floor(Math.random() * 5) + 1,
+        created_date: new Date().getTime(),
+        id: dataId.current++, // useRef를 사용하여 id값을 관리함
+      };
+    });
+    setData(initData);
+  };
+
+  // useEffect를 사용하여 컴포넌트가 마운트되면 getData 함수를 호출함
+  useEffect(() => {
+    getData();
+  }, []);
 
   const onCreate = (author, content, emotion) => {
     const created_date = new Date().getTime();
@@ -61,7 +58,6 @@ function App() {
 
   return (
     <div className="App">
-      <Lifecycle />
       <DiaryEditor onCreate={onCreate} /> {/* onCreate 함수를 props로 전달 */}
       <DiaryList onEdit={onEdit} onRemove={onRemove} diaryList={data} />
       {/* onEdit, onRemove 함수와 data를 props로 전달 */}
