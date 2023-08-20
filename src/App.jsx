@@ -50,10 +50,19 @@ function App() {
     setData(newDiaryList); // 새로운 배열을 setData로 넘겨줌
   };
 
+  const onEdit = (targetId, newContent) => {
+    setData(
+      data.map((it) =>
+        it.id === targetId ? { ...it, content: newContent } : it
+      )
+    ); // 기존의 아이템을 그대로 유지하면서 id가 targetId인 아이템의 content만 newContent로 바꾼 후에 새로운 배열을 setData로 넘겨줌
+  };
+
   return (
     <div className="App">
       <DiaryEditor onCreate={onCreate} /> {/* onCreate 함수를 props로 전달 */}
-      <DiaryList onRemove={onRemove} diaryList={data} />
+      <DiaryList onEdit={onEdit} onRemove={onRemove} diaryList={data} />
+      {/* onEdit, onRemove 함수와 data를 props로 전달 */}
     </div>
   );
 }
