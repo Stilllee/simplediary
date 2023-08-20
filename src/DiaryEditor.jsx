@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-const DiaryEditor = () => {
+const DiaryEditor = ({ onCreate }) => {
   const authorInput = useRef(); // useRef함수를 호출해 반환값을 authorInput에 담아줌
   const contentInput = useRef(); // useRef함수를 호출해 반환값을 contentInput에 담아줌
 
@@ -27,7 +27,14 @@ const DiaryEditor = () => {
       contentInput.current.focus(); // 현재 가리키는 값(contentInput)을 current로 불러와 focus라는 기능을 사용함
       return; // 더 이상 진행되지 않도록 함수를 여기서 끝내기
     }
+
+    onCreate(state.author, state.content, state.emotion); // props로 전달받은 onCreate 함수에 state값을 전달함
     alert("저장 성공!");
+    setState({
+      author: "",
+      content: "",
+      emotion: "1",
+    }); // 저장 후 input값을 초기화함
   };
 
   return (
