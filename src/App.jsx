@@ -45,7 +45,7 @@ function App() {
     setData([newItem, ...data]); // 기존 배열에 새로운 아이템을 추가한 새로운 배열을 만들어서 setData로 넘겨줌
   };
 
-  const onDelete = (targetId) => {
+  const onRemove = (targetId) => {
     const newDiaryList = data.filter((it) => it.id !== targetId); // id가 targetId인 아이템을 제외한 새로운 배열을 만듦
     setData(newDiaryList); // 새로운 배열을 setData로 넘겨줌
   };
@@ -53,7 +53,7 @@ function App() {
   return (
     <div className="App">
       <DiaryEditor onCreate={onCreate} /> {/* onCreate 함수를 props로 전달 */}
-      <DiaryList onDelete={onDelete} diaryList={data} />
+      <DiaryList onRemove={onRemove} diaryList={data} />
     </div>
   );
 }
