@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import DiaryEditor from "./DiaryEditor";
 import DiaryList from "./DiaryList";
@@ -56,9 +56,26 @@ function App() {
     ); // 기존의 아이템을 그대로 유지하면서 id가 targetId인 아이템의 content만 newContent로 바꾼 후에 새로운 배열을 setData로 넘겨줌
   };
 
+  // useMemo를 사용하여 getDiaryAnalysis 함수를 호출한 결과를 기억함
+  const getDiaryAnalysis = useMemo(() => {
+    console.log("일기 분석 시작");
+
+    const goodCount = data.filter((it) => it.emotion >= 3).length; // 감정이 3 이상인 아이템의 개수를 구함
+    const badCount = data.length - goodCount;
+    const goodRatio = (goodCount / data.length) * 100;
+    return { goodCount, badCount, goodRatio }; // goodCount, badCount, goodRatio를 객체로 반환함
+  }, [data.length]); // data.length가 변경될 때만 getDiaryAnalysis 함수를 호출함
+
+  // getDiaryAnalysis 함수를 호출하여 반환값을 goodCount, badCount, goodRatio에 할당함
+  const { goodCount, badCount, goodRatio } = getDiaryAnalysis;
+
   return (
     <div className="App">
       <DiaryEditor onCreate={onCreate} /> {/* onCreate 함수를 props로 전달 */}
+      <div>전체일기 : {data.length}</div>
+      <div>기분 좋은 일기 개수 : {goodCount}</div>
+      <div>기분 나쁜 일기 개수 : {badCount}</div>
+      <div>기분 좋은 일기 비율 : {goodRatio}</div>
       <DiaryList onEdit={onEdit} onRemove={onRemove} diaryList={data} />
       {/* onEdit, onRemove 함수와 data를 props로 전달 */}
     </div>
