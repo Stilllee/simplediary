@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import DiaryEditor from "./DiaryEditor";
 import DiaryList from "./DiaryList";
-import OptimizeTest from "./OptimizeTest";
 
 function App() {
   const [data, setData] = useState([]);
@@ -31,7 +30,8 @@ function App() {
     getData();
   }, []);
 
-  const onCreate = (author, content, emotion) => {
+  // useCallback을 사용하여 onCreate 함수를 기억함
+  const onCreate = useCallback((author, content, emotion) => {
     const created_date = new Date().getTime();
     const newItem = {
       author,
@@ -41,8 +41,11 @@ function App() {
       id: dataId.current, // useRef를 사용하여 id값을 관리함
     };
     dataId.current += 1; // 다음 아이템을 위해 id값을 1 증가시킴
-    setData([newItem, ...data]); // 기존 배열에 새로운 아이템을 추가한 새로운 배열을 만들어서 setData로 넘겨줌
-  };
+
+    // useCallback으로 인해 함수 내부의 data가 최신 상태를 유지하지 못하는 문제를 해결하기 위해,
+    // 함수를 인자로 받는 setData를 사용하여 항상 최신 상태의 data를 사용하고, newItem을 배열의 시작 부분에 추가함
+    setData((data) => [newItem, ...data]); // 기존 배열에 새로운 아이템을 추가한 새로운 배열을 만들어서 setData로 넘겨줌
+  }, []);
 
   const onRemove = (targetId) => {
     const newDiaryList = data.filter((it) => it.id !== targetId); // id가 targetId인 아이템을 제외한 새로운 배열을 만듦
@@ -70,7 +73,6 @@ function App() {
 
   return (
     <div className="App">
-      <OptimizeTest />
       <DiaryEditor onCreate={onCreate} /> {/* onCreate 함수를 props로 전달 */}
       <div>전체일기 : {data.length}</div>
       <div>기분 좋은 일기 개수 : {goodCount}</div>
