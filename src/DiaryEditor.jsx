@@ -1,12 +1,8 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 
 const DiaryEditor = ({ onCreate }) => {
   const authorInput = useRef(); // useRef함수를 호출해 반환값을 authorInput에 담아줌
   const contentInput = useRef(); // useRef함수를 호출해 반환값을 contentInput에 담아줌
-
-  useEffect(() => {
-    console.log("DiaryEditor rendered");
-  });
 
   const [state, setState] = useState({
     author: "",

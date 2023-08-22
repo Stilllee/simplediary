@@ -47,18 +47,17 @@ function App() {
     setData((data) => [newItem, ...data]); // 기존 배열에 새로운 아이템을 추가한 새로운 배열을 만들어서 setData로 넘겨줌
   }, []);
 
-  const onRemove = (targetId) => {
-    const newDiaryList = data.filter((it) => it.id !== targetId); // id가 targetId인 아이템을 제외한 새로운 배열을 만듦
-    setData(newDiaryList); // 새로운 배열을 setData로 넘겨줌
-  };
+  const onRemove = useCallback((targetId) => {
+    setData((data) => data.filter((it) => it.id !== targetId)); // id가 targetId인 아이템을 제외한 새로운 배열을 만들어서 새로운 배열을 setData로 넘겨줌
+  }, []);
 
-  const onEdit = (targetId, newContent) => {
-    setData(
+  const onEdit = useCallback((targetId, newContent) => {
+    setData((data) =>
       data.map((it) =>
         it.id === targetId ? { ...it, content: newContent } : it
       )
     ); // 기존의 아이템을 그대로 유지하면서 id가 targetId인 아이템의 content만 newContent로 바꾼 후에 새로운 배열을 setData로 넘겨줌
-  };
+  }, []);
 
   // useMemo를 사용하여 getDiaryAnalysis 함수를 호출한 결과를 기억함
   const getDiaryAnalysis = useMemo(() => {
