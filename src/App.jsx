@@ -1,10 +1,36 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import "./App.css";
 import DiaryEditor from "./DiaryEditor";
 import DiaryList from "./DiaryList";
 
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "INIT": {
+      return action.data; // action.data를 반환하면 새로운 state가 됨
+    }
+    case "CREATE": {
+      const created_date = new Date().getTime();
+      const newItem = {
+        ...action.data,
+        created_date,
+      };
+      return [newItem, ...state];
+    } // action.data를 기반으로 새로운 아이템을 만들고, 기존의 state와 합쳐서 새로운 state를 반환함
+    case "REMOVE": {
+      return state.filter((it) => it.id !== action.targetId); // id가 targetId가 아닌 아이템만 골라서 새로운 state를 반환함
+    }
+    case "EDIT": {
+      return state.map((it) =>
+        it.id === action.targetId ? { ...it, content: action.newContent } : it
+      ); // id가 targetId인 아이템만 content를 수정하고, 나머지 아이템은 그대로 둔 채 새로운 state를 반환함
+    }
+    default:
+      return state; // 아무 일도 일어나지 않으면 기존의 state를 반환함
+  }
+};
+
 function App() {
-  const [data, setData] = useState([]);
+  const [data, dispatch] = useReducer(reducer, []);
 
   const dataId = useRef(0);
 
@@ -22,7 +48,7 @@ function App() {
         id: dataId.current++, // useRef를 사용하여 id값을 관리함
       };
     });
-    setData(initData);
+    dispatch({ type: "INIT", data: initData }); // 데이터를 받아온 후에 dispatch를 통해 reducer에 action을 전달함
   };
 
   // useEffect를 사용하여 컴포넌트가 마운트되면 getData 함수를 호출함
@@ -32,31 +58,20 @@ function App() {
 
   // useCallback을 사용하여 onCreate 함수를 기억함
   const onCreate = useCallback((author, content, emotion) => {
-    const created_date = new Date().getTime();
-    const newItem = {
-      author,
-      content,
-      emotion,
-      created_date,
-      id: dataId.current, // useRef를 사용하여 id값을 관리함
-    };
-    dataId.current += 1; // 다음 아이템을 위해 id값을 1 증가시킴
+    dispatch({
+      type: "CREATE",
+      data: { author, content, emotion, id: dataId.current },
+    }); // dispatch를 통해 reducer에 action을 전달함
 
-    // useCallback으로 인해 함수 내부의 data가 최신 상태를 유지하지 못하는 문제를 해결하기 위해,
-    // 함수를 인자로 받는 setData를 사용하여 항상 최신 상태의 data를 사용하고, newItem을 배열의 시작 부분에 추가함
-    setData((data) => [newItem, ...data]); // 기존 배열에 새로운 아이템을 추가한 새로운 배열을 만들어서 setData로 넘겨줌
+    dataId.current += 1; // 다음 아이템을 위해 id값을 1 증가시킴
   }, []);
 
   const onRemove = useCallback((targetId) => {
-    setData((data) => data.filter((it) => it.id !== targetId)); // id가 targetId인 아이템을 제외한 새로운 배열을 만들어서 새로운 배열을 setData로 넘겨줌
+    dispatch({ type: "REMOVE", targetId }); // dispatch를 통해 reducer에 action을 전달함
   }, []);
 
   const onEdit = useCallback((targetId, newContent) => {
-    setData((data) =>
-      data.map((it) =>
-        it.id === targetId ? { ...it, content: newContent } : it
-      )
-    ); // 기존의 아이템을 그대로 유지하면서 id가 targetId인 아이템의 content만 newContent로 바꾼 후에 새로운 배열을 setData로 넘겨줌
+    dispatch({ type: "EDIT", targetId, newContent }); // dispatch를 통해 reducer에 action을 전달함
   }, []);
 
   // useMemo를 사용하여 getDiaryAnalysis 함수를 호출한 결과를 기억함
