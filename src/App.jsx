@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+} from "react";
 import "./App.css";
 import DiaryEditor from "./DiaryEditor";
 import DiaryList from "./DiaryList";
@@ -28,6 +34,10 @@ const reducer = (state, action) => {
       return state; // 아무 일도 일어나지 않으면 기존의 state를 반환함
   }
 };
+
+export const DiaryStateContext = React.createContext();
+
+export const DiaryDispatchContext = React.createContext();
 
 function App() {
   const [data, dispatch] = useReducer(reducer, []);
@@ -74,6 +84,10 @@ function App() {
     dispatch({ type: "EDIT", targetId, newContent }); // dispatch를 통해 reducer에 action을 전달함
   }, []);
 
+  const memoizedDispatchs = useMemo(() => {
+    return { onCreate, onRemove, onEdit };
+  }, []); // onCreate, onRemove, onEdit 함수를 객체로 묶어서 반환하고, 재생성되지 않도록 빈 배열을 두 번째 인자로 전달함
+
   // useMemo를 사용하여 getDiaryAnalysis 함수를 호출한 결과를 기억함
   const getDiaryAnalysis = useMemo(() => {
     const goodCount = data.filter((it) => it.emotion >= 3).length; // 감정이 3 이상인 아이템의 개수를 구함
@@ -86,15 +100,20 @@ function App() {
   const { goodCount, badCount, goodRatio } = getDiaryAnalysis;
 
   return (
-    <div className="App">
-      <DiaryEditor onCreate={onCreate} /> {/* onCreate 함수를 props로 전달 */}
-      <div>전체일기 : {data.length}</div>
-      <div>기분 좋은 일기 개수 : {goodCount}</div>
-      <div>기분 나쁜 일기 개수 : {badCount}</div>
-      <div>기분 좋은 일기 비율 : {goodRatio}</div>
-      <DiaryList onEdit={onEdit} onRemove={onRemove} diaryList={data} />
-      {/* onEdit, onRemove 함수와 data를 props로 전달 */}
-    </div>
+    <DiaryStateContext.Provider value={data}>
+      <DiaryDispatchContext.Provider value={memoizedDispatchs}>
+        <div className="App">
+          <DiaryEditor onCreate={onCreate} />{" "}
+          {/* onCreate 함수를 props로 전달 */}
+          <div>전체일기 : {data.length}</div>
+          <div>기분 좋은 일기 개수 : {goodCount}</div>
+          <div>기분 나쁜 일기 개수 : {badCount}</div>
+          <div>기분 좋은 일기 비율 : {goodRatio}</div>
+          <DiaryList onEdit={onEdit} onRemove={onRemove} />
+          {/* onEdit, onRemove 함수와 data를 props로 전달 */}
+        </div>
+      </DiaryDispatchContext.Provider>
+    </DiaryStateContext.Provider>
   );
 }
 

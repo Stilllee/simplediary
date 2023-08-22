@@ -1,6 +1,9 @@
-import React, { useRef, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
+import { DiaryDispatchContext } from "./App";
 
-const DiaryEditor = ({ onCreate }) => {
+const DiaryEditor = () => {
+  const { onCreate } = useContext(DiaryDispatchContext); // useContext를 사용하여 DiaryDispatchContext의 onCreate값을 읽어옴
+
   const authorInput = useRef(); // useRef함수를 호출해 반환값을 authorInput에 담아줌
   const contentInput = useRef(); // useRef함수를 호출해 반환값을 contentInput에 담아줌
 
